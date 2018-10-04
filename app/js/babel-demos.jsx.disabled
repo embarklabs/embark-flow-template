@@ -1,0 +1,114 @@
+// @flow
+
+// embark's default webpack config enables several babel plugins and presets
+
+// this module needs several packages to be installed in your DApp:
+//   npm install -D param.macro prop-types react react-dom
+
+// @babel/plugin-proposal-class-properties
+// -----------------------------------------------------------------------------
+class Bork {
+  // instance properties
+  instanceProperty = 'bork';
+  boundFunction = () => {
+    return this.instanceProperty;
+  }
+
+  // static class properties
+  static staticProperty = 'babelIsCool';
+  static staticFunction = function() {
+    return Bork.staticProperty;
+  }
+}
+
+let myBork = new Bork();
+
+// property initializers are not on the prototype.
+// $FlowFixMe
+console.log(myBork.__proto__.boundFunction); // undefined
+
+// bound functions are bound to the class instance.
+console.log(myBork.boundFunction.call(undefined)); // 'bork'
+
+// static function exists on the class.
+console.log(Bork.staticFunction()); // 'babelIsCool'
+
+// @babel/plugin-proposal-object-rest-spread
+// -----------------------------------------------------------------------------
+let { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 };
+
+console.log(x); // 1
+console.log(y); // 2
+console.log(z); // { a: 3, b: 4 }
+
+// @babel/plugin-syntax-dynamic-import
+// -----------------------------------------------------------------------------
+(async function () {
+  const m = await import(`./log`);
+  console.log(m.default); // { hello: 'log module export' }
+}());
+
+// @babel/preset-env, @babel/plugin-transform-runtime, @babel/runtime-corejs2
+// -----------------------------------------------------------------------------
+// provide trasforms and polyfills so you can develop with the latest JS
+// features while supporting older browsers (built-ins are used if available)
+// embark's default targets = browsers: ['last 1 version', 'not dead', '> 0.2%']
+
+// @babel/preset-react
+// -----------------------------------------------------------------------------
+// NOTE: modules using JSX may have a .js or .jsx filename extension
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+interface MyProps {}
+
+class MyComponent extends React.Component<MyProps> {
+  render() {
+    return (
+      <div></div>
+    );
+  }
+}
+
+ReactDOM.render(<MyComponent />, document.createElement('div'));
+
+// babel-plugin-macros
+// -----------------------------------------------------------------------------
+import it from 'param.macro';
+
+const people = [
+  { name: 'Jeff' },
+  { name: 'Karen' },
+  { name: 'Genevieve' }
+]
+
+console.log(people.map(it.name)); // ['Jeff', 'Karen', 'Genevieve']
+
+// babel-plugin-transform-react-remove-prop-types
+// -----------------------------------------------------------------------------
+// in a production build, the 'prop-types' import and propTypes property will
+// be stripped out of the source code
+
+// NOTE: when developing with Flow, usage of 'prop-types' is redundant unless
+// the output of development builds may be used in contexts where runtime type
+// checking is important and flow-bin is not available
+import PropTypes from 'prop-types';
+
+interface MyProps2 {
+  name: string;
+}
+
+class MyComponent2 extends React.Component<MyProps2> {
+  static propTypes = {
+    name: PropTypes.string
+  }
+
+  render() {
+    return (
+      <div>{this.props.name}</div>
+    );
+  }
+}
+
+// Flow will detect a type error since name is being assigned a number
+ReactDOM.render(<MyComponent2 name={2}/>, document.createElement('div'));
