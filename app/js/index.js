@@ -10,7 +10,7 @@ import EmbarkJS from 'Embark/EmbarkJS';
 
 import {Greeter} from './greet';
 
-// remove the .disabled extension from app/js/babel-demos.js and uncomment the
+// remove the .disabled extension from app/js/babel-demos.jsx and uncomment the
 // line below to enable some demos of webpack/babel features included with
 // Embark, but first see the package installation instructions in that file
 
